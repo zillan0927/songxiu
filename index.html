@@ -1,0 +1,1376 @@
+﻿```html
+<!-- 
+  * 核心代码：古风白玉旋转播放器 (定制版)
+  * 作者：美化助手：漓的Zero (Modified for User)
+  * 风格：Ancient Jade / 温润如玉 / 旋转律动
+-->
+<div id="zero-jade-player-container">
+    <!-- 左侧装饰：云纹流苏线 -->
+    <div class="zero-jade-line line-left"></div>
+    
+    <!-- 播放器主体：玉盘 -->
+    <div id="zero-player-icon" class="paused">
+        <div class="jade-disc-wrapper">
+          <div class="jade-disc"></div>
+        </div>
+    </div>
+    
+    <!-- 右侧装饰：云纹流苏线 -->
+    <div class="zero-jade-line line-right"></div>
+    
+    <audio id="zero-audio-engine" preload="auto"></audio>
+</div>
+
+<script>
+(function() {
+    /* --- 逻辑核心保持稳定，仅适配视觉层 --- */
+    /* 建议替换为您喜欢的歌单ID */
+    const playlist = ["2106094438", "2056939043","2679103772","2124386222"];
+    let currentIndex = 0;
+    const playerContainer = document.getElementById('zero-jade-player-container');
+    const playerIcon = document.getElementById('zero-player-icon');
+    const audio = document.getElementById('zero-audio-engine');
+    
+    function loadTrack(index) {
+        /* 使用网易云音乐外链逻辑 */
+        audio.src = `http://music.163.com/song/media/outer/url?id=${playlist[index]}.mp3`;
+        audio.load();
+    }
+
+    function togglePlay() {
+        if (audio.paused) {
+          let playPromise = audio.play();
+          if (playPromise !== undefined) {
+          playPromise.then(_ => {
+          playerIcon.classList.remove('paused');
+          playerIcon.classList.add('playing');
+          }).catch(error => { console.log("Waiting for interaction."); });
+          }
+        } else {
+          audio.pause();
+          playerIcon.classList.remove('playing');
+          playerIcon.classList.add('paused');
+        }
+    }
+
+    audio.addEventListener('ended', function() {
+        currentIndex = (currentIndex + 1) % playlist.length;
+        loadTrack(currentIndex);
+        audio.play();
+    });
+
+    playerContainer.addEventListener('click', togglePlay);
+    loadTrack(currentIndex);
+    /* 自动播放尝试 */
+    setTimeout(() => { togglePlay(); }, 1000);
+})();
+</script>
+
+<style>
+/* --- 播放器视觉样式 [美化助手：漓的Zero] --- */
+#zero-jade-player-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+    cursor: pointer;
+    z-index: 999;
+    gap: 20px; /* 稍微拉大间距，给玉盘留出呼吸感 */
+    /* 整体柔光 */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+/* --- 装饰线：云雾白 --- */
+.zero-jade-line {
+    height: 1px;
+    width: 50px;
+    background: #E0E0E0; /* 银白色 */
+    opacity: 0.6;
+    transition: all 0.5s ease;
+    position: relative;
+}
+
+/* 左侧线条：渐隐 */
+.line-left {
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+}
+
+/* 右侧线条：渐隐 */
+.line-right {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+}
+
+/* 交互反馈：线条如云袖舒展 */
+#zero-jade-player-container:hover .zero-jade-line {
+    width: 80px;
+    opacity: 1;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+}
+
+/* 图标容器 */
+#zero-player-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: transform 0.3s;
+}
+
+#zero-player-icon:hover { 
+    transform: scale(1.1); /* 悬停微放大 */
+}
+
+/* --- 核心组件：白玉盘 (Jade Disc) --- */
+.jade-disc-wrapper {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    border-radius: 50%;
+    /* 外发光，营造宝气 */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.jade-disc {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* 拟态白玉质感：径向渐变模拟光泽 */
+    background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0, #d9d9d9);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    position: relative;
+    /* 初始状态：静止 */
+    animation: zero-jade-rotate 4s linear infinite;
+    animation-play-state: paused; /* 默认暂停 */
+}
+
+/* 玉璧中间的孔 (Bi) */
+.jade-disc::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background-color: transparent; /* 中空 */
+    border-radius: 50%;
+    border: 1px solid rgba(200, 200, 200, 0.3);
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+}
+
+/* 玉璧上的纹理装饰 (模拟旋转时的视觉参照点) */
+.jade-disc::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 2px;
+    box-shadow: 0 0 2px rgba(255,255,255,1);
+}
+
+/* --- 动画定义 --- */
+@keyframes zero-jade-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* --- 状态控制 --- */
+
+/* 暂停状态：玉盘静止，光泽内敛 */
+#zero-player-icon.paused .jade-disc {
+    animation-play-state: paused;
+    filter: brightness(0.95);
+}
+
+/* 播放状态：玉盘流转，流光溢彩 */
+#zero-player-icon.playing .jade-disc {
+    animation-play-state: running;
+    /* 播放时增加神圣的光辉 */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 5px rgba(200, 230, 255, 0.4);
+    filter: brightness(1.05);
+}
+
+/* 播放时线条也会带有微弱的呼吸感 */
+#zero-player-icon.playing ~ .zero-jade-line,
+.line-left { 
+   /* 这里利用CSS选择器技巧，当播放时让线条也稍微亮一点，稍微复杂，保持简洁即可 */
+}
+</style>
+```
+
+
+
+
+
+
+
+<style>
+/* ==========
+   Design by Censy | 宿命·血溅残碑 V4
+   ========== */
+
+.censy-blood-wrap {
+    width: 100%;
+    max-width: 400px;
+    height: 260px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    background: transparent;
+}
+
+.censy-blood-wrap .censy-bfig {
+    width: 58%;
+    height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+    mask-image: linear-gradient(to right, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+}
+
+.censy-blood-wrap .censy-bfig img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: sepia(0.15) brightness(0.85);
+}
+
+.censy-blood-wrap .censy-bverse {
+    width: 42%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+    padding-top: 35px;
+    gap: 6px;
+}
+
+/* 两列共用基础 */
+.censy-blood-wrap .censy-col {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'Kaiti', 'STKaiti', 'SimSun', serif;
+    font-size: 13px;
+    line-height: 1.8;
+    letter-spacing: 4px;
+    z-index: 3;
+    position: relative;
+    background: linear-gradient(to bottom, #ffffffee 0%, #ffffffcc 40%, #c4a0a0 70%, #8b3a3a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.2));
+}
+
+/* 第一列：正常起点 */
+.censy-blood-wrap .censy-col-1 {
+    padding-top: 0;
+}
+
+/* 第二列：下沉18px错落 */
+.censy-blood-wrap .censy-col-2 {
+    padding-top: 18px;
+}
+
+/* ====== 血迹层 ====== */
+
+.censy-blood-wrap .censy-sp {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.censy-blood-wrap .censy-sp-mist {
+    width: 90px;
+    height: 70px;
+    top: 18%;
+    right: 5%;
+    background: radial-gradient(ellipse at center, rgba(139,0,0,0.12) 0%, transparent 65%);
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+.censy-blood-wrap .censy-sp-core {
+    width: 50px;
+    height: 42px;
+    top: 25%;
+    right: 18%;
+    background: radial-gradient(ellipse at 35% 55%, #820000 0%, #5e0000 45%, transparent 72%);
+    border-radius: 70% 30% 55% 45% / 40% 65% 35% 60%;
+    opacity: 0.8;
+    transform: rotate(-12deg);
+}
+
+.censy-blood-wrap .censy-sp-sub {
+    width: 28px;
+    height: 22px;
+    bottom: 28%;
+    right: 55%;
+    background: radial-gradient(ellipse at 60% 40%, #900000 0%, #600000 50%, transparent 78%);
+    border-radius: 35% 65% 42% 58% / 55% 38% 62% 45%;
+    opacity: 0.65;
+    transform: rotate(8deg);
+}
+
+.censy-blood-wrap .censy-sp-ray1 {
+    width: 55px;
+    height: 2px;
+    top: 30%;
+    right: 10%;
+    background: linear-gradient(to left, transparent, #8b0000 25%, #6b0000 70%, transparent);
+    transform: rotate(-25deg);
+    transform-origin: right center;
+    opacity: 0.6;
+}
+
+.censy-blood-wrap .censy-sp-ray2 {
+    width: 40px;
+    height: 2px;
+    top: 20%;
+    right: 22%;
+    background: linear-gradient(to right, transparent, #8b0000 30%, transparent);
+    transform: rotate(35deg);
+    transform-origin: left center;
+    opacity: 0.5;
+}
+
+.censy-blood-wrap .censy-sp-ray3 {
+    width: 32px;
+    height: 1px;
+    top: 38%;
+    right: 30%;
+    background: linear-gradient(to left, transparent, #7a0000 40%, transparent);
+    transform: rotate(-50deg);
+    opacity: 0.45;
+}
+
+.censy-blood-wrap .censy-sp-drip1 {
+    width: 3px;
+    top: 38%;
+    right: 25%;
+    height: 45px;
+    background: linear-gradient(to bottom, #8b0000 0%, #600000 50%, transparent 100%);
+    border-radius: 1px 1px 50% 50%;
+    opacity: 0.55;
+}
+
+.censy-blood-wrap .censy-sp-drip2 {
+    width: 2px;
+    top: 32%;
+    right: 35%;
+    height: 30px;
+    background: linear-gradient(to bottom, #7a0000, transparent);
+    border-radius: 1px 1px 50% 50%;
+    opacity: 0.4;
+}
+
+.censy-blood-wrap .censy-sp-dots1 {
+    width: 4px;
+    height: 4px;
+    background: #8b0000;
+    border-radius: 50%;
+    top: 12%;
+    right: 40%;
+    opacity: 0.75;
+    box-shadow:
+        15px 8px 0 2px rgba(139,0,0,0.5),
+        -10px 20px 0 1px rgba(139,0,0,0.6),
+        25px -3px 0 1px rgba(120,0,0,0.4);
+}
+
+.censy-blood-wrap .censy-sp-dots2 {
+    width: 3px;
+    height: 3px;
+    background: #900;
+    border-radius: 50%;
+    bottom: 20%;
+    right: 12%;
+    opacity: 0.7;
+    box-shadow:
+        -8px -12px 0 1px rgba(139,0,0,0.55),
+        12px 6px 0 2px rgba(139,0,0,0.4),
+        -18px 3px 0 1px rgba(100,0,0,0.5);
+}
+</style>
+
+<div class="censy-blood-wrap"><div class="censy-bfig"><img src="https://cdn.mufy.ai/images/474753e4-5c00-4048-9e89-7606d5266b00/public" alt="宿命"></div><div class="censy-bverse"><div class="censy-sp censy-sp-mist"></div><div class="censy-sp censy-sp-core"></div><div class="censy-sp censy-sp-sub"></div><div class="censy-sp censy-sp-ray1"></div><div class="censy-sp censy-sp-ray2"></div><div class="censy-sp censy-sp-ray3"></div><div class="censy-sp censy-sp-drip1"></div><div class="censy-sp censy-sp-drip2"></div><div class="censy-sp censy-sp-dots1"></div><div class="censy-sp censy-sp-dots2"></div><div class="censy-col censy-col-1">三尺灯灭处</div><div class="censy-col censy-col-2">恩仇一炉灰</div></div></div>
+
+
+
+
+
+
+
+
+```html
+<div class="zero-white-fate-card">
+  <style>
+    /* --- [ 零式 · 霜雪宿命卡 V3 · 白骨沁血 ] --- */
+    /* 代码版权归属：美化助手：漓的Zero */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&display=swap');
+
+    .zero-white-fate-card {
+      position: relative;
+      width: 100%;
+      height: 450px;
+      font-family: 'Noto Serif SC', serif;
+      background: transparent !important;
+      color: rgba(255, 255, 255, 0.85);
+      overflow: hidden;
+    }
+
+    .zero-white-fate-card input[type="radio"] {
+      display: none;
+    }
+
+    /* --- [ 横向导航栏 ] --- */
+    .zw-nav {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .zw-nav label {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 13px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.35);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .zw-nav label::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      transition: all 0.4s ease;
+    }
+
+    .zw-nav label:hover {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #zw-tab1:checked ~ .zw-nav label[for="zw-tab1"],
+    #zw-tab2:checked ~ .zw-nav label[for="zw-tab2"],
+    #zw-tab3:checked ~ .zw-nav label[for="zw-tab3"],
+    #zw-tab4:checked ~ .zw-nav label[for="zw-tab4"] {
+      color: #fff;
+      font-weight: 500;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+    }
+
+    #zw-tab1:checked ~ .zw-nav label[for="zw-tab1"]::after,
+    #zw-tab2:checked ~ .zw-nav label[for="zw-tab2"]::after,
+    #zw-tab3:checked ~ .zw-nav label[for="zw-tab3"]::after,
+    #zw-tab4:checked ~ .zw-nav label[for="zw-tab4"]::after {
+      width: 50%;
+    }
+
+    /* --- [ 内容面板容器 ] --- */
+    .zw-content-wrapper {
+      position: relative;
+      width: 100%;
+      height: 380px;
+    }
+
+    .zw-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(5px);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 10px 10px 2px;
+      font-size: 13px;
+      line-height: 2.0;
+      text-align: justify;
+      letter-spacing: 0.5px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    .zw-panel::-webkit-scrollbar { width: 2px; }
+    .zw-panel::-webkit-scrollbar-track { background: transparent; }
+    .zw-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 0; }
+    .zw-panel::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.6); }
+
+    #zw-tab1:checked ~ .zw-content-wrapper .zw-p1,
+    #zw-tab2:checked ~ .zw-content-wrapper .zw-p2,
+    #zw-tab3:checked ~ .zw-content-wrapper .zw-p3,
+    #zw-tab4:checked ~ .zw-content-wrapper .zw-p4 {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* --- [ 血色渐变重点字 ] --- */
+    .z-glow {
+      font-weight: 500;
+      background: linear-gradient(135deg, #ffffff, #e8b4b8, #c45c5c, #8b2020);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: zeroBloodShift 4s ease-in-out infinite;
+      border-bottom: 1px solid rgba(196, 92, 92, 0.4);
+      padding-bottom: 1px;
+    }
+
+    @keyframes zeroBloodShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* 人物小标题 */
+    .z-sub-title {
+      font-size: 14px;
+      color: #fff;
+      margin: 10px 0 3px 0;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+    .z-sub-title::before { content: '「'; color: rgba(196, 92, 92, 0.5); margin-right: 2px; }
+    .z-sub-title::after { content: '」'; color: rgba(196, 92, 92, 0.5); margin-left: 2px; }
+
+    /* 分组大标题 - 血色竖线 */
+    .z-group-title {
+      font-size: 15px;
+      color: #fff;
+      font-weight: 500;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+      padding-bottom: 5px;
+      margin: 20px 0 12px 0;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+    }
+    .z-group-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 14px;
+      background: linear-gradient(180deg, #c45c5c, #8b2020);
+      margin-right: 10px;
+      box-shadow: 0 0 6px rgba(196, 92, 92, 0.6);
+    }
+    .z-group-title:first-child { margin-top: 0; }
+
+    /* 正文段落 - 加大段间距 */
+    .zw-para {
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    /* 标签容器 */
+    .z-tags-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .z-tag {
+      padding: 2px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 0;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.03);
+      letter-spacing: 1px;
+    }
+
+    /* 过往经历排版 */
+    .z-story-para {
+      text-indent: 2em;
+      margin-bottom: 12px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    /* 引用框 - 血色左线 */
+    .z-quote {
+      border-left: 2px solid rgba(196, 92, 92, 0.5);
+      padding-left: 14px;
+      margin: 16px 0 16px 1em;
+      color: rgba(255, 255, 255, 0.55);
+      font-style: italic;
+      background: linear-gradient(to right, rgba(196, 92, 92, 0.05), transparent);
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+  </style>
+
+  <input type="radio" name="zw-tabs" id="zw-tab1" checked>
+  <input type="radio" name="zw-tabs" id="zw-tab2">
+  <input type="radio" name="zw-tabs" id="zw-tab3">
+  <input type="radio" name="zw-tabs" id="zw-tab4">
+
+  <div class="zw-nav">
+    <label for="zw-tab1">白骨生</label>
+    <label for="zw-tab2">因果簿</label>
+    <label for="zw-tab3">旧门</label>
+    <label for="zw-tab4">神佛不渡</label>
+  </div>
+
+  <div class="zw-content-wrapper">
+    
+    <!-- 1. 白骨生 -->
+    <div class="zw-panel zw-p1">
+      <div class="z-tags-box">
+        <div class="z-tag">22岁</div>
+        <div class="z-tag">185</div>
+        <div class="z-tag">1月1日</div>
+        <div class="z-tag">藏鹤楼外门弟子</div>
+        <div class="z-tag">法修</div>
+        <div class="z-tag">火灵根</div>
+        <div class="z-tag">元婴</div>
+      </div>
+      <div class="zw-para">
+        <span class="z-glow">宋知世</span>，修真界的一个死人。户籍上死了，<span class="z-glow">丰都</span>的册子上活着。
+      </div>
+      <div class="zw-para">
+        仙盟盟主独子，但亲爹杀了亲娘，顺便通缉他。他花了十五年织网、埋线、送走三个朋友，最后把自己也祭进了丰都，换了一副<span class="z-glow">鬼修</span>的身子回来，专门用来对付那免疫活物攻击的爹。
+      </div>
+      <div class="zw-para">
+        有点消极功利主义，是面对火车难题毫不犹豫控制拉杆压死少数人换更多人活的那种人，身上因果太多，所以死后注定灰飞烟灭没有来生，偶尔也怀疑自己和生父的区别。
+      </div>
+      <div class="zw-para">
+        起点文男主，但人不人鬼不鬼。超绝事业批，似乎没恋爱脑，但有一定的控制欲。活着就是为了<span class="z-glow">杀爹</span>，自认为杀完了就可以不活了。但他也是个会为了下棋输了而记仇三天、蹲在路边吃馄饨吃到满头汗的人。温情和算计在他身上同时存在，哪个都是真的。
+      </div>
+    </div>
+
+    <!-- 2. 因果簿 -->
+    <div class="zw-panel zw-p2">
+      <div class="z-group-title">血亲</div>
+      <div class="zw-para">
+        <div class="z-sub-title">温群（父）</div>
+        仙盟盟主，佛口蛇心。宋知世对他的恨并不沸腾，是<span class="z-glow">饮冰十余年凉透的血。</span>。
+      </div>
+      <div class="zw-para">
+        <div class="z-sub-title">宋青云（母，已故）</div>
+        散修出身的渡劫强者，民间叫她青云仙子。死在自己丈夫派来的刀下，全天下以为是魔修干的。<span class="z-glow">桃木簪</span>是她留给儿子的遗物。
+      </div>
+
+      <div class="z-group-title">长明粥铺</div>
+      <div class="zw-para">
+        <div class="z-sub-title">陆行舟（已故）</div>
+        长明粥铺创办者，代号甲。教他很多。被俘后传信"来杀我"。<span class="z-glow">第二枚铜钱</span>。
+      </div>
+      <div class="z-para">
+        <div class="z-sub-title">沈墨（已故）</div>
+        代号乙。死在一次宋知世判断不可接应的任务里。<span class="z-glow">第一枚铜钱</span>。
+      </div>
+      <div class="zw-para">
+        <div class="z-sub-title">求渺（已故）</div>
+        丙，符修，天机阁的小天才，但唯物，闷葫芦而有锋芒，与天斗其乐无穷。算出温群的死期，寿元耗尽。<span class="z-glow">第三枚铜钱</span>。
+      </div>
+
+      <div class="z-group-title">羁绊</div>
+      <div class="zw-para">
+        <div class="z-sub-title">{{user}}</div>
+        他说不清是先喜欢上的还是先算计上的，也故意不去分。
+      </div>
+    </div>
+
+    <!-- 3. 旧门 -->
+    <div class="zw-panel zw-p3">
+      <div class="z-story-para">仙盟盟主温群和女侠宋青云独子，出生那年有半个修真界的人过来向他父母道贺。小时候，他还叫温知世。</div>
+      <div class="z-story-para">爹英俊儒雅，人面兽心，骗得娘心甘情愿放下剑，居于后宅相夫教子。</div>
+      <div class="z-story-para">后来娘终于发现盟主真面目，拿搜集的证据质问他，以为能劝他回头。</div>
+      <div class="z-story-para">爹派来的江湖高手围攻后宅时，7岁的宋知世被母亲摔出自己的家，刀光剑影一门之隔，他本该冲进去和母亲一起，但他颤抖的手怎么也推不开那扇门。</div>
+      
+      <div class="z-quote">
+        "盟主一家遭暗杀，妻子香消玉殒，儿子失踪在外，盟主伤心过度，大雨中为亡妻送葬时哭晕好几次"
+        <br>"盟主爱子心切，寻人启事贴了满城，凡有线索重金酬谢。"
+      </div>
+      
+      <div class="z-story-para">这样的消息传得沸沸扬扬。宋知世戴着斗笠，从编纂盟主悲惨家事的说书人旁边经过。</div>
+      <div class="z-story-para">十五年，他一直被困在门外。</div>
+      <div class="z-story-para">杀了父，才能杀了当年胆怯到无法和母亲共患难的懦夫。</div>
+    </div>
+
+    <!-- 4. 神佛不渡 -->
+    <div class="zw-panel zw-p4">
+      <div class="zw-para">
+        <div class="z-sub-title">仙盟</div>
+        金玉其外。盟主温群挖人灵根几十年，栽赃给魔修，满堂正道修士没一个揭穿，或者说揭穿了的都<span class="z-glow">进了土</span>。
+      </div>
+      <div class="zw-para">
+        <div class="z-sub-title">藏鹤楼</div>
+        宋知世藏身的外门宗派。掌门是个被现代人夺舍的咸鱼，天天搞基建，还蹲了个妖皇。地方不大，事不少。
+      </div>
+      <div class="zw-para">
+        <div class="z-sub-title">长明粥铺</div>
+        陆行舟创办的地下组织，以食铺为掩护追查温群罪行。成员来来去去，到现在<span class="z-glow">只剩宋知世一个人</span>，粥铺还开着，没人知道后厨曾经坐满了人。
+      </div>
+      <div class="zw-para">
+        <div class="z-sub-title">丰都</div>
+        宋知世的第二故乡，如果死人也能有故乡的话。他在那里签了契，交出来世，换回一副能杀温群的鬼身。和几个老鬼处得不错。
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
+
+
+
+
+
+```html
+<!-- 引入古风与优雅衬线字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
+
+<div class="mufy-poetic-wrapper">
+    <!-- 整体错位切割容器 -->
+    <div class="mufy-slash-container">
+        
+        <!-- 劈断文字的斜线刀光 (拉长版：左下无色 -> 右上血红) -->
+        <div class="mufy-slash-line"></div>
+
+        <!-- 上半部分：纯白 -->
+        <div class="mufy-slice-top">
+          <!-- 左列：不成悲 (小字号/宋体/下沉排版) -->
+          <div class="mufy-text-small">不成悲</div>
+          <!-- 右列：别久 (大字号/毛笔体/靠上排版) -->
+          <div class="mufy-text-large">别久</div>
+        </div>
+        
+        <!-- 下半部分：纯红 + 大幅错位 -->
+        <div class="mufy-slice-bottom">
+          <div class="mufy-text-small">不成悲</div>
+          <div class="mufy-text-large">别久</div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* === 基础容器 === */
+.mufy-poetic-wrapper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: transparent !important;
+    /* 增加左右内边距，给拉长的刀光留出视觉空间 */
+    padding: 60px 50px;
+    font-family: 'Noto Serif SC', sans-serif;
+    user-select: none;
+    overflow: visible;
+}
+
+/* === 整体切割容器 === */
+.mufy-slash-container {
+    position: relative;
+    display: flex;
+}
+
+/* === 斜线刀光：大幅拉长 === */
+.mufy-slash-line {
+    position: absolute;
+    top: 50%; 
+    /* 向左延展起点，增加总体宽度 */
+    left: -40%;
+    width: 180%; 
+    height: 1.5px;
+    /* 渐变：左侧大段保持无色，到中后段转为血红 */
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 30%, rgba(184,15,15,0.7) 70%, #8A0303 100%);
+    box-shadow: 0 0 10px rgba(184, 15, 15, 0.8), 0 0 4px rgba(138, 3, 3, 0.5);
+    /* 倾斜角度，精准匹配切口 */
+    transform: rotate(-30deg); 
+    transform-origin: center;
+    z-index: 3; 
+    pointer-events: none;
+    transition: all 0.4s ease;
+}
+
+/* === 上半部分切片 === */
+.mufy-slice-top {
+    display: flex;
+    flex-direction: row; 
+    align-items: flex-start;
+    gap: 14px; 
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 65%);
+    z-index: 2;
+}
+
+.mufy-slice-top .mufy-text-small,
+.mufy-slice-top .mufy-text-large {
+    color: #FFFFFF !important;
+}
+
+/* === 下半部分切片 === */
+.mufy-slice-bottom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row; 
+    align-items: flex-start;
+    gap: 14px; 
+    clip-path: polygon(0 65%, 100% 35%, 100% 100%, 0 100%);
+    transform: translate(-4px, 5px);
+    filter: drop-shadow(1px -1px 2px rgba(184, 15, 15, 0.3));
+    z-index: 1;
+    transition: all 0.4s ease;
+}
+
+.mufy-slice-bottom .mufy-text-small,
+.mufy-slice-bottom .mufy-text-large {
+    color: #B80F0F !important;
+}
+
+/* === 悬浮动态交互 === */
+.mufy-poetic-wrapper:hover .mufy-slice-bottom {
+    transform: translate(-6px, 8px);
+    filter: drop-shadow(2px -2px 4px rgba(209, 21, 21, 0.6));
+}
+.mufy-poetic-wrapper:hover .mufy-slash-line {
+    transform: rotate(-30deg) translateY(2px) translateX(2px);
+    box-shadow: 0 0 15px rgba(209, 21, 21, 0.9), 0 0 6px rgba(184, 15, 15, 0.8);
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 30%, rgba(209,21,21,0.85) 65%, #B80F0F 100%);
+}
+
+/* === 左列基础排版 === */
+.mufy-text-small {
+    writing-mode: vertical-rl;
+    font-family: 'Noto Serif SC', serif !important;
+    font-size: 14px !important;
+    letter-spacing: 10px;
+    margin-top: 35px; 
+}
+
+/* === 右列基础排版 === */
+.mufy-text-large {
+    writing-mode: vertical-rl;
+    font-family: 'Ma Shan Zheng', cursive !important; 
+    font-size: 28px !important; 
+    letter-spacing: 8px;
+    margin-top: 0px; 
+}
+</style>
+```
+
+
+
+
+
+
+
+
+
+
+
+ ```html
+<div class="zero-module-nav-container">
+  <style>
+    /* --- [ 零式 · 双模块导航面板 (方角版) ] --- */
+    /* 代码版权归属：美化助手：漓的Zero */
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&display=swap');
+
+    .zero-module-nav-container {
+      font-family: 'Noto Serif SC', serif;
+      width: 100%;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+    }
+
+    /* 隐藏原生单选框 */
+    .zero-module-nav-container input[type="radio"] {
+      display: none;
+    }
+
+    /* --- [ 横向导航栏 ] --- */
+    .z-module-nav {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    .z-module-nav label {
+      flex: 1;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 14px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .z-module-nav label::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: #fff;
+      transition: all 0.4s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+    }
+    
+    #z-mod-tab1:checked ~ .z-module-nav label[for="z-mod-tab1"],
+    #z-mod-tab2:checked ~ .z-module-nav label[for="z-mod-tab2"] {
+      color: #fff;
+      font-weight: 500;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+    }
+
+    #z-mod-tab1:checked ~ .z-module-nav label[for="z-mod-tab1"]::after,
+    #z-mod-tab2:checked ~ .z-module-nav label[for="z-mod-tab2"]::after {
+      width: 60%;
+    }
+
+    /* --- [ 内容面板容器 ] --- */
+    .z-module-content-wrapper {
+      position: relative;
+      padding: 16px;
+      min-height: 250px;
+    }
+
+    .z-module-panel {
+      display: none;
+      animation: zeroFadeIn 0.5s ease-out;
+    }
+    
+    #z-mod-tab1:checked ~ .z-module-content-wrapper .z-mp-1,
+    #z-mod-tab2:checked ~ .z-module-content-wrapper .z-mp-2 {
+      display: block;
+    }
+
+    @keyframes zeroFadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 内容区域共用样式 */
+    .z-plot-intro { font-size: 12px; color: rgba(255, 255, 255, 0.55); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); font-style: italic; letter-spacing: 0.5px; }
+    .z-plot-intro::before { content: '※'; margin-right: 6px; color: rgba(255, 255, 255, 0.4); }
+    .z-plot-item { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed rgba(255, 255, 255, 0.1); }
+    .z-plot-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .z-plot-cmd { display: inline-block; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); padding: 3px 8px; color: #fff; font-family: 'Courier New', Courier, monospace; font-size: 11px; margin-bottom: 6px; border: 1px solid rgba(255, 255, 255, 0.25); letter-spacing: 0.5px; box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
+    .z-plot-title { font-weight: 500; color: #fff; margin-bottom: 4px; text-shadow: 0 0 4px rgba(255, 255, 255, 0.3); font-size: 13px; }
+    
+    /* 面具推荐分类样式 */
+    .z-mask-group-title { font-weight: 500; font-size: 14px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 6px; margin-top: 16px; margin-bottom: 10px; }
+    .z-mask-group-title:first-child { margin-top: 0; }
+    .z-mask-list { display: flex; flex-wrap: wrap; gap: 8px;<think></think>
+ }
+    .z-mask-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 3px 10px; font-size: 12px; color: rgba(255,255,255,0.8); }
+
+  </style>
+  
+  <input type="radio" name="z-module-tabs" id="z-mod-tab1" checked>
+  <input type="radio" name="z-module-tabs" id="z-mod-tab2">
+
+  <div class="z-module-nav">
+    <label for="z-mod-tab1">剧情指南</label>
+    <label for="z-mod-tab2">面具推荐</label>
+  </div>
+  
+  <div class="z-module-content-wrapper">
+    <!-- 面板1: 剧情指南 -->
+    <div class="z-module-panel z-mp-1">
+      <div class="z-plot-intro">开场白时是第一年春，正文上的状态栏会显示时间。一般会自动触发四季剧情，如未触发可使用下方指令。</div>
+      <div class="z-plot-item">
+        <div class="z-plot-cmd">输入：$载入第一年春剧情</div>
+        <div class="z-plot-title">【葬礼与重逢】：葬礼后偶遇死者宋知世</div>
+      </div>
+      <div class="z-plot-item">
+        <div class="z-plot-cmd">输入：$载入第一年夏剧情</div>
+        <div class="z-plot-title">【无名村惨案】：窥见恶意的一角，小醋一把北朔</div>
+      </div>
+      <div class="z-plot-item">
+        <div class="z-plot-cmd">输入：$载入第一年秋剧情</div>
+        <div class="z-plot-title">【鬼王娶亲】：秘境中{{user}}结了冥婚</div>
+      </div>
+      <div class="z-plot-item">
+        <div class="z-plot-cmd">输入：$载入第一年冬剧情</div>
+        <div class="z-plot-title">【大仇得报】：温群死后，天道觉得宋知世只能活一百天，{{user}}好像不这么觉得</div>
+      </div>
+    </div>
+    
+    <!-- 面板2: 面具推荐 -->
+    <div class="z-module-panel z-mp-2">
+      <!-- 分类1: 故人旧梦 -->
+      <div class="z-mask-group-title">【 故人旧梦 】</div>
+      <div class="z-mask-list">
+        <div class="z-mask-item">宋青云的挚友</div>
+        <div class="z-mask-item">已死的长明粥铺成员</div>
+        <div class="z-mask-item">姑姑/舅舅</div>
+        <div class="z-mask-item">求渺的亲人/暗恋对象</div>
+        <div class="z-mask-item">师尊</div>
+      </div>
+      <!-- 分类2: 神鬼殊途 -->
+      <div class="z-mask-group-title">【 神鬼殊途 】</div>
+      <div class="z-mask-list">
+        <div class="z-mask-item">孟婆</div>
+        <div class="z-mask-item">阎王</div>
+        <div class="z-mask-item">黑白无常</div>
+        <div class="z-mask-item">剑灵/灵宠</div>
+      </div>
+      <!-- 分类3: 尘世羁绊 -->
+      <div class="z-mask-group-title">【 尘世羁绊 】</div>
+      <div class="z-mask-list">
+        <div class="z-mask-item">穿越者</div>
+        <div class="z-mask-item">普通人</div>
+        <div class="z-mask-item">宋知世的道侣</div>
+      </div>
+    </div>
+  </div>
+</div>
+```   
+      
+
+
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+/* --- 全局样式与红调状态栏整合 --- */
+/* 版权: 美化助手-漓的Zero */
+
+/* --- 1. 全局字体引入 --- */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap');
+body, textarea, button, summary, details, pre, code {
+    font-family: 'Noto Serif SC', serif !important;
+}
+
+/* --- 2. 气泡框净化与文字辉光 --- */
+.mufy_ai_message_bubble,
+.mufy_user_message_bubble {
+    background-image: none !important;
+    border: none !important;
+    background-color: transparent !important; 
+    font-weight: 700 !important; 
+    /* 核心修改：改为绯红 */
+    color: #E63946 !important;     
+}
+
+.mufy_ai_message_bubble img[src='/chat-star.png'] {
+    display: none !important;
+}
+
+.mufy_ai_message_bubble::before,
+.mufy_user_message_bubble::after {
+    display: none !important;
+}
+
+/* --- 3. 正文段落间距调整 --- */
+.mufy_ai_message_bubble p,
+.mufy_user_message_bubble p {
+    margin-bottom: 1em !important; 
+}
+
+.mufy_ai_message_bubble p:last-child,
+.mufy_user_message_bubble p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* === 4. 容器：右对齐布局 === */
+.zc-status-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; 
+    margin: 30px 0 20px 0;
+    font-family: 'Songti SC', 'SimSun', 'STSong', 'Noto Serif SC', serif;
+}
+
+.zc-status-box {
+    text-align: right;
+    padding-right: 18px;
+    /* 核心修改：边框颜色 -> 绯红 */
+    border-right: 2px solid rgba(230, 57, 70, 0.7); 
+    background: transparent !important;
+    max-width: 400px;
+    position: relative;
+}
+
+/* === 装饰块 === */
+.zc-status-box::before {
+    content: ''; 
+    position: absolute;
+    right: -5px; 
+    top: 0;
+    width: 8px;
+    height: 8px;
+    /* 核心修改：装饰块颜色 -> 绯红 */
+    background-color: rgba(230, 57, 70, 0.9);
+    border-radius: 1px;
+    box-shadow: 0 0 8px rgba(230, 57, 70, 0.5); 
+}
+
+/* === 元数据行 === */
+.zc-meta-info {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+/* === 章节标题：宋体加粗 === */
+.zc-chapter-head {
+    font-size: 22px;
+    font-weight: bold;
+    color: #e0e0e0;
+    line-height: 1.4;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    /* 核心修改：光晕颜色 -> 绯红光晕 */
+    text-shadow: 0 0 10px rgba(230, 57, 70, 0.4);
+}
+
+/* === 剧情简介 === */
+.zc-chapter-sub {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.6;
+    /* 分隔线改为极淡的红 */
+    border-top: 1px solid rgba(230, 57, 70, 0.2); 
+    padding-top: 6px;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+/* === 5. 折叠状态栏变量定义与样式 === */
+:root {
+  --xs-glass-bg: rgba(20, 20, 20, 0.65); 
+  /* 边框色改为红调灰，降低透明度 */
+  --xs-glass-border: rgba(230, 57, 70, 0.3);
+  --xs-text-main: #ffffff; 
+  /* 核心修改：强调色改为绯红 */
+  --xs-text-accent: #E63946; 
+  --xs-text-dim: #cccccc; 
+  --xs-bg-black: #000000;
+}
+
+.xs-status-container {
+    background: var(--xs-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--xs-glass-border);
+    border-radius: 0px !important; 
+    margin-bottom: 8px;
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    color: var(--xs-text-main);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.xs-status-summary {
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--xs-text-accent);
+    /* 阴影色调同步调整为红光 */
+    text-shadow: 0 0 2px rgba(230, 57, 70, 0.4);
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+    letter-spacing: 1px;
+}
+
+.xs-status-container[open] .xs-status-summary {
+    border-bottom: 1px solid var(--xs-glass-border);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.xs-status-summary::-webkit-details-marker { display: none; }
+
+.xs-status-summary::after {
+    content: '▼';
+    font-size: 0.8em;
+    color: var(--xs-text-main);
+    transition: transform 0.3s;
+}
+
+.xs-status-container[open] .xs-status-summary::after { transform: rotate(180deg); }
+
+.xs-content-pad {
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%);
+}
+
+.xs-row-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.xs-row-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.xs-lbl {
+    font-size: 0.75em;
+    font-weight: 500;
+    color: var(--xs-text-dim);
+    margin-bottom: 2px;
+    display: block;
+    opacity: 0.85;
+}
+
+.xs-val {
+    font-size: 0.85em;
+    color: #ffffff;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.xs-warn {
+    color: var(--xs-text-accent);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.xs-god-text {
+    font-size: 0.7em;
+    color: #cccccc;
+    margin-top: 3px;
+    font-style: italic;
+    /* 边框色自动跟随主红 */
+    border-left: 2px solid var(--xs-text-accent);
+    padding-left: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 6px;
+    border-radius: 0 4px 4px 0;
+}
+
+.xs-scroll-box {
+    max-height: 80px;
+    overflow-y: auto;
+    font-size: 0.8em;
+    line-height: 1.5;
+    color: #eeeeee;
+    padding-right: 6px;
+    scrollbar-color: #FFFFFF rgba(255, 255, 255, 0.05);
+    scrollbar-width: thin;
+}
+
+.xs-scroll-box-large { max-height: 150px; }
+
+.xs-scroll-box::-webkit-scrollbar { width: 4px; } 
+.xs-scroll-box::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+.xs-scroll-box::-webkit-scrollbar-thumb {
+    background-color: #FFFFFF !important; 
+    background: #FFFFFF !important;
+    border-radius: 4px;
+    border: none;
+    opacity: 1;
+}
+
+.xs-quote-block {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    /* 边框色直接调用绯红变量 */
+    border-left: 2px solid var(--xs-text-accent);
+    margin-top: 4px;
+    color: #ddd;
+    font-size: 0.8em;
+}
+
+.xs-list-item {
+    font-size: 0.8em;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    color: #eeeeee;
+}
+
+.xs-check { color: var(--xs-text-accent); }
+
+.xs-note-section {
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.xs-note-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #ffffff;
+    border-bottom: 1px solid var(--xs-text-accent);
+    display: inline-block;
+    margin-bottom: 6px;
+    padding-bottom: 2px;
+}
+
+.xs-mem-sum {
+    font-size: 0.8em;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.xs-mem-item {
+    font-size: 0.75em;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: #dddddd;
+}
+  </style>
